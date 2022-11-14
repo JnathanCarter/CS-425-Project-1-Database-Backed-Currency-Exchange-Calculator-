@@ -15,5 +15,13 @@ public class RateDAO {
     RateDAO(DAOFactory daoFactory){
         this.daoFactory = daoFactory;
     }
+/*
+    public String find(){
 
+    }
+    
+    public String updateInternalDB(){
+
+    }
+*/
 }
