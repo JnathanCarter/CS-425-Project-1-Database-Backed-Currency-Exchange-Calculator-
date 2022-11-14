@@ -42,7 +42,7 @@ public class RateServlet extends HttpServlet {
             String date = request.getParameter("date");
             RateDAO dao = daoFactory.gRateDAO();
 
-           // out.println(dao.find(date));
+            out.println(dao.find(date));
 
         } catch (Exception e) {
             e.printStackTrace();
