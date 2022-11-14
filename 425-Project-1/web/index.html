@@ -1,15 +1,43 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
--->
 <html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <div>TODO write content</div>
-    </body>
+
+<head>
+    <title>Lab #4</title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="jquery-3.6.1.min.js"></script>
+</head>
+
+<body>
+
+    <form name="calculatorform" id="calculatorform">
+
+        <fieldset>
+
+            <legend>Currency Conversion Calculator</legend>
+
+            <p>Convert to: <span id="currencylist"></span></p>
+
+            <p>
+                <label for="usd_value">Value (in USD):</label>
+                <input type="number" name="usd_value" id="usd_value">
+
+                <label for="rate_date">Date:</label>
+                <input type="date" name="rate_date" id="rate_date">
+            </p>
+
+            <p><input type="button" value="Convert" onclick="Lab4.onClick();"></p>
+
+        </fieldset>
+
+    </form>
+
+    <div id="output"></div>
+
+    <script type="text/javascript">
+        Lab4.getCurrenciesList(); /* uncomment this in Part Two */
+    </script>
+
+</body>
+
 </html>

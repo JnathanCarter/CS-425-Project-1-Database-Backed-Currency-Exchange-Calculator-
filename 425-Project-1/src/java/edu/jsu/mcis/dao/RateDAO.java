@@ -24,7 +24,7 @@ public class RateDAO {
         private final DAOFactory daoFactory;
         private final String QUERY_SELECT = "SELECT * FROM rate WHERE rate_date = ?";
         private final String QUERY_EXTERNAL_DB = "https://testbed.jaysnellen.com:8443/JSUExchangeRatesServer/rates";
-        
+
         RateDAO(DAOFactory daoFactory) {
                 this.daoFactory = daoFactory;
         }
@@ -34,8 +34,7 @@ public class RateDAO {
                 Connection conn = daoFactory.getConnection();
                 PreparedStatement ps = null;
                 ResultSet rs = null;
-                                                JSONObject json = new JSONObject();
-
+                JSONObject json = new JSONObject();
 
                 try {
 
@@ -45,20 +44,24 @@ public class RateDAO {
                         boolean hasresults = ps.execute();
 
                         if (hasresults) {
-
                                 rs = ps.getResultSet();
-                                
-                               Map results  = new LinkedHashMap<String,String>();
-                                
-                               json.put("date", date);
+                                if (rs.next()) {
 
-                                while (rs.next()) {
-                                        results.put(rs.getString("currencyid"), rs.getString("rate"));
+                                        System.err.print(rs);
 
+                                        Map results = new LinkedHashMap<String, String>();
+
+                                        json.put("date", date);
+                                        results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+                                        while (rs.next()) {
+                                                results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+
+                                        }
+                                        json.put("rates", results);
+
+                                } else {
+                                        return updateInternalDB(date);
                                 }
-                        json.put("rates",results);
-                        }else{
-                                updateInternalDB(date);
                         }
 
                 } catch (Exception e) {
@@ -95,6 +98,6 @@ public class RateDAO {
         }
 
         public String updateInternalDB(String date) {
-return "this wasnt in db";
+                return "this wasnt in db";
         }
 }
