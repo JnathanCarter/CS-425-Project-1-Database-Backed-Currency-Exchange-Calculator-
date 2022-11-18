@@ -46,150 +46,168 @@ public class RateDAO {
          * If the information does not exist,
          * then it is fetched by an external source using updateInternalDB()
          * 
+     * @param key
          * @param date - String for date of the rates
          * @return - JSON String containing rate information
          */
-        public String find(String date) {
-                JSONArray jsonArray = new JSONArray();
-                Connection conn = daoFactory.getConnection();
-                PreparedStatement ps = null;
-                ResultSet rs = null;
-                JSONObject json = new JSONObject();
+        public String find(String key, String date) {
+                if (keyIsValid(key)) {
+                        if (accessLimitReached(key)) {
+                                return "{\"message\"access limit reached\",\"success\": false}";
+                        }
 
-                try {
+                        JSONArray jsonArray = new JSONArray();
+                        Connection conn = daoFactory.getConnection();
+                        PreparedStatement ps = null;
+                        ResultSet rs = null;
+                        JSONObject json = new JSONObject();
 
-                        ps = conn.prepareStatement(QUERY_SELECT);
-                        ps.setString(1, date);
+                        try {
 
-                        boolean hasresults = ps.execute();
+                                ps = conn.prepareStatement(QUERY_SELECT);
+                                ps.setString(1, date);
 
-                        if (hasresults) {
-                                rs = ps.getResultSet();
-                                if (rs.next()) {
-                                        // Dianostic Print
-                                        System.err.print(rs);
+                                boolean hasresults = ps.execute();
 
-                                        Map results = new LinkedHashMap<String, String>();
+                                if (hasresults) {
+                                        rs = ps.getResultSet();
+                                        if (rs.next()) {
+                                                // Dianostic Print
+                                                System.err.print(rs);
 
-                                        json.put("date", date);
-                                        results.put(rs.getString("currencyid"), rs.getDouble("rate"));
-                                        while (rs.next()) {
+                                                Map results = new LinkedHashMap<String, String>();
+
+                                                json.put("date", date);
                                                 results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+                                                while (rs.next()) {
+                                                        results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+
+                                                }
+                                                json.put("rates", results);
 
                                         }
-                                        json.put("rates", results);
+                                        // If rates for the date is not found then the DB is update from external source
+                                        else {
+                                                updateInternalDB(date);
+                                                return find(key, date);
+                                        }
+                                }
 
-                                }
-                                // If rates for the date is not found then the DB is update from external source
-                                else {
-                                        updateInternalDB(date);
-                                        return find(date);
-                                }
-                        }
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        } finally {
 
-                } catch (Exception e) {
-                        e.printStackTrace();
-                } finally {
+                                if (rs != null) {
+                                        try {
+                                                rs.close();
+                                                rs = null;
+                                        } catch (Exception e) {
+                                                e.printStackTrace();
+                                        }
+                                }
+                                if (ps != null) {
+                                        try {
+                                                ps.close();
+                                                ps = null;
+                                        } catch (Exception e) {
+                                                e.printStackTrace();
+                                        }
+                                }
+                                if (conn != null) {
+                                        try {
+                                                conn.close();
+                                                conn = null;
+                                        } catch (Exception e) {
+                                                e.printStackTrace();
+                                        }
+                                }
 
-                        if (rs != null) {
-                                try {
-                                        rs.close();
-                                        rs = null;
-                                } catch (Exception e) {
-                                        e.printStackTrace();
-                                }
                         }
-                        if (ps != null) {
-                                try {
-                                        ps.close();
-                                        ps = null;
-                                } catch (Exception e) {
-                                        e.printStackTrace();
-                                }
-                        }
-                        if (conn != null) {
-                                try {
-                                        conn.close();
-                                        conn = null;
-                                } catch (Exception e) {
-                                        e.printStackTrace();
-                                }
-                        }
-
+                        return JSONValue.toJSONString(json);
+                } else {
+                        return "{\"message\"Key is NOT valid\",\"success\": false}";
                 }
-                return JSONValue.toJSONString(json);
         }
 
-        public String findByDateCurrency(String date, String currency) {
-                JSONArray jsonArray = new JSONArray();
-                Connection conn = daoFactory.getConnection();
-                PreparedStatement ps = null;
-                ResultSet rs = null;
-                JSONObject json = new JSONObject();
+        public String findByDateCurrency(String key, String date, String currency) {
 
-                try {
+                if (keyIsValid(key)) {
+                        if (accessLimitReached(key)) {
+                                return "{\"message\"Key is NOT valid\",\"success\": false}";
+                        }
 
-                        ps = conn.prepareStatement(QUERY_SELECT_DATE_CURRENCY);
-                        ps.setString(1, date);
-                        ps.setString(2, currency);
+                        JSONArray jsonArray = new JSONArray();
+                        Connection conn = daoFactory.getConnection();
+                        PreparedStatement ps = null;
+                        ResultSet rs = null;
+                        JSONObject json = new JSONObject();
 
-                        boolean hasresults = ps.execute();
+                        try {
 
-                        if (hasresults) {
-                                rs = ps.getResultSet();
-                                if (rs.next()) {
-                                        // Dianostic Print
-                                        System.err.print("result set -------->" + rs);
+                                ps = conn.prepareStatement(QUERY_SELECT_DATE_CURRENCY);
+                                ps.setString(1, date);
+                                ps.setString(2, currency);
 
-                                        Map results = new LinkedHashMap<String, String>();
+                                boolean hasresults = ps.execute();
 
-                                        json.put("date", date);
-                                        results.put(rs.getString("currencyid"), rs.getDouble("rate"));
-                                        while (rs.next()) {
+                                if (hasresults) {
+                                        rs = ps.getResultSet();
+                                        if (rs.next()) {
+                                                // Dianostic Print
+                                                System.err.print(rs);
+
+                                                Map results = new LinkedHashMap<String, String>();
+
+                                                json.put("date", date);
                                                 results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+                                                while (rs.next()) {
+                                                        results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+
+                                                }
+                                                json.put("rates", results);
 
                                         }
-                                        json.put("rates", results);
+                                        // If rates for the date is not found then the DB is update from external source
+                                        else {
+                                                updateInternalDB(date);
+                                                return findByDateCurrency(key, date, currency);
+                                        }
+                                }
 
-                                }
-                                // If rates for the date is not found then the DB is update from external source
-                                else {
-                                        updateInternalDB(date);
-                                        return findByDateCurrency(date, currency);
-                                }
-                        }
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        } finally {
 
-                } catch (Exception e) {
-                        e.printStackTrace();
-                } finally {
+                                if (rs != null) {
+                                        try {
+                                                rs.close();
+                                                rs = null;
+                                        } catch (Exception e) {
+                                                e.printStackTrace();
+                                        }
+                                }
+                                if (ps != null) {
+                                        try {
+                                                ps.close();
+                                                ps = null;
+                                        } catch (Exception e) {
+                                                e.printStackTrace();
+                                        }
+                                }
+                                if (conn != null) {
+                                        try {
+                                                conn.close();
+                                                conn = null;
+                                        } catch (Exception e) {
+                                                e.printStackTrace();
+                                        }
+                                }
 
-                        if (rs != null) {
-                                try {
-                                        rs.close();
-                                        rs = null;
-                                } catch (Exception e) {
-                                        e.printStackTrace();
-                                }
                         }
-                        if (ps != null) {
-                                try {
-                                        ps.close();
-                                        ps = null;
-                                } catch (Exception e) {
-                                        e.printStackTrace();
-                                }
-                        }
-                        if (conn != null) {
-                                try {
-                                        conn.close();
-                                        conn = null;
-                                } catch (Exception e) {
-                                        e.printStackTrace();
-                                }
-                        }
-
+                        return JSONValue.toJSONString(json);
+                } else {
+                        return "{\"message\"Key is NOT valid\",\"success\": false}";
                 }
-                return JSONValue.toJSONString(json);
         }
 
         /**
@@ -208,9 +226,10 @@ public class RateDAO {
 
                 try {
                         // HTTP GET request to external api for rate data
-                        String urlString = "https://testbed.jaysnellen.com:8443/JSUExchangeRatesServer/rates?date="+date;
+                        String urlString = "https://testbed.jaysnellen.com:8443/JSUExchangeRatesServer/rates?date="
+                                        + date;
                         URL url = new URL(urlString);
-                        
+
                         HttpURLConnection con = (HttpURLConnection) url.openConnection();
                         con.setRequestMethod("GET");
 
@@ -356,24 +375,29 @@ public class RateDAO {
                 }
                 return false;
         }
+
+        private Boolean keyIsValid(String key) {
+                UserDAO userDAO = daoFactory.getUserDAO();
+
+                if (userDAO.checkIfValidKey(key)) {
+                        return true;
+                } else {
+                        return false;
+                }
+        }
+
+        private boolean accessLimitReached(String key) {
+            /*    
+            UserAccessDAO userAccessDAO = daoFactory.getUserAccesDAO();
+                UserDAO userDAO = daoFactory.getUserDAO();
+
+                if (userAccessDAO.checkIfAccessLimitReached(userDAO.getIDFromKey(key))) {
+                        userAccessDAO.incrementAccessCounter(userDAO.getIDFromKey(key));
+                        return true;
+                } else {
+                        return false;
+                }
+            */
+            return false;
+        }
 }
-
-// Descarded code
-
-// class ParameterStringBuilder {
-// public static String getParamsString(Map<String, String> params)
-// throws UnsupportedEncodingException {
-// StringBuilder result = new StringBuilder();
-
-// for (Map.Entry<String, String> entry : params.entrySet()) {
-// result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-// result.append("=");
-// result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-// result.append("&");
-// }
-
-// String resultString = result.toString();
-// return resultString.length() > 0
-// ? resultString.substring(0, resultString.length() - 1)
-// : resultString;
-// }

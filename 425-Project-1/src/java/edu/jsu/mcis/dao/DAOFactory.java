@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package edu.jsu.mcis.dao;
+
 import java.sql.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -13,7 +14,7 @@ import javax.sql.DataSource;
  * @author johnc
  */
 public class DAOFactory {
-     private DataSource ds = null;
+    private DataSource ds = null;
 
     public DAOFactory() {
 
@@ -47,10 +48,19 @@ public class DAOFactory {
 
     }
 
-    public CurrencyDAO getCurrencyDAO(){
+    public CurrencyDAO getCurrencyDAO() {
         return new CurrencyDAO(this);
     }
-    public RateDAO gRateDAO(){
+
+    public RateDAO gRateDAO() {
         return new RateDAO(this);
+    }
+
+    public UserDAO getUserDAO() {
+        return new UserDAO(this);
+    }
+
+    public UserAccessDAO getUserAccesDAO() {
+        return new UserAccessDAO(this);
     }
 }

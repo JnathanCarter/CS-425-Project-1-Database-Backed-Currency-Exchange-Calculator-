@@ -40,55 +40,52 @@ public class RateServlet extends HttpServlet {
         } else {
             daoFactory = (DAOFactory) context.getAttribute("daoFactory");
         }
-
         response.setContentType("application/json; charset=UTF-8");
+
         try (PrintWriter out = response.getWriter()) {
-            String uri = request.getPathInfo();
-            String[] path;
-            if (uri != null) {
-                path = uri.split("/");
+            // Checks for key parameter
+            if (request.getParameterMap().containsKey("key")) {
 
-                String date;
-                String currency;
+                String uri = request.getPathInfo();
+                String[] path;
+                String key = request.getParameter("key");
 
-                RateDAO dao = daoFactory.gRateDAO();
+                if (uri != null) {
+                    path = uri.split("/");
 
-                int lengthOfPath = path.length;
+                    String date;
+                    String currency;
 
-                switch (lengthOfPath) {
-                    /*
-                     * case 1:
-                     * DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                     * LocalDateTime now = LocalDateTime.now();
-                     * LocalDate currentDate = now.toLocalDate();
-                     * 
-                     * System.out.println("Todays date --------------> " + currentDate.toString());
-                     * 
-                     * out.println(dao.find(currentDate.toString()));
-                     * break;
-                     */
-                    case 2:
-                        date = path[1];
-                        out.println(dao.find(date));
-                        break;
-                    case 3:
-                        date = path[1];
-                        currency = path[2];
+                    RateDAO dao = daoFactory.gRateDAO();
 
-                        out.println(dao.findByDateCurrency(date, currency));
-                        break;
+                    int lengthOfPath = path.length;
+
+                    switch (lengthOfPath) {
+                        case 2:
+                            date = path[1];
+                            out.println(dao.find(key, date));
+                            break;
+                        case 3:
+                            date = path[1];
+                            currency = path[2];
+
+                            out.println(dao.findByDateCurrency(key, date, currency));
+                            break;
+                    }
+                } else {
+                    RateDAO dao = daoFactory.gRateDAO();
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDate currentDate = now.toLocalDate();
+
+                    System.out.println("Todays date --------------> " + currentDate.toString());
+
+                    out.println(dao.find(key, currentDate.toString()));
                 }
+
             } else {
-                RateDAO dao = daoFactory.gRateDAO();
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                LocalDateTime now = LocalDateTime.now();
-                LocalDate currentDate = now.toLocalDate();
-
-                System.out.println("Todays date --------------> " + currentDate.toString());
-
-                out.println(dao.find(currentDate.toString()));
+                out.println("NO ACCESS KEY PROVIDED");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
