@@ -34,6 +34,8 @@ public class RateDAO {
         private final String QUERY_CREATE = "INSERT INTO rate (currencyid, rate_date, rate)"
                         + "VALUES (?,?,?)";
 
+        private final String QUERY_SELECT_DATE_CURRENCY = "SELECT * FROM rate WHERE rate_date = ? AND currencyid = ?";
+
         /* Constructor */
         RateDAO(DAOFactory daoFactory) {
                 this.daoFactory = daoFactory;
@@ -80,7 +82,80 @@ public class RateDAO {
                                 }
                                 // If rates for the date is not found then the DB is update from external source
                                 else {
-                                        return updateInternalDB(date);
+                                        updateInternalDB(date);
+                                        return find(date);
+                                }
+                        }
+
+                } catch (Exception e) {
+                        e.printStackTrace();
+                } finally {
+
+                        if (rs != null) {
+                                try {
+                                        rs.close();
+                                        rs = null;
+                                } catch (Exception e) {
+                                        e.printStackTrace();
+                                }
+                        }
+                        if (ps != null) {
+                                try {
+                                        ps.close();
+                                        ps = null;
+                                } catch (Exception e) {
+                                        e.printStackTrace();
+                                }
+                        }
+                        if (conn != null) {
+                                try {
+                                        conn.close();
+                                        conn = null;
+                                } catch (Exception e) {
+                                        e.printStackTrace();
+                                }
+                        }
+
+                }
+                return JSONValue.toJSONString(json);
+        }
+
+        public String findByDateCurrency(String date, String currency) {
+                JSONArray jsonArray = new JSONArray();
+                Connection conn = daoFactory.getConnection();
+                PreparedStatement ps = null;
+                ResultSet rs = null;
+                JSONObject json = new JSONObject();
+
+                try {
+
+                        ps = conn.prepareStatement(QUERY_SELECT_DATE_CURRENCY);
+                        ps.setString(1, date);
+                        ps.setString(2, currency);
+
+                        boolean hasresults = ps.execute();
+
+                        if (hasresults) {
+                                rs = ps.getResultSet();
+                                if (rs.next()) {
+                                        // Dianostic Print
+                                        System.err.print("result set -------->" + rs);
+
+                                        Map results = new LinkedHashMap<String, String>();
+
+                                        json.put("date", date);
+                                        results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+                                        while (rs.next()) {
+                                                results.put(rs.getString("currencyid"), rs.getDouble("rate"));
+
+                                        }
+                                        json.put("rates", results);
+
+                                }
+                                // If rates for the date is not found then the DB is update from external source
+                                else {
+                                        updateInternalDB(date);
+                                        return findByDateCurrency(date, currency);
                                 }
                         }
 
@@ -124,7 +199,7 @@ public class RateDAO {
          * @param date - String for date of the rates
          * @return - JSON String of rate data
          */
-        public String updateInternalDB(String date) {
+        public Boolean updateInternalDB(String date) {
 
                 // request from external api
                 Connection conn = daoFactory.getConnection();
@@ -178,7 +253,7 @@ public class RateDAO {
                          * the find method is called again to return the newly added data
                          */
                         if (addCurrencyData(map, date)) {
-                                this.find(date);
+                                return true;
                         }
 
                 } catch (Exception e) {
@@ -214,7 +289,7 @@ public class RateDAO {
 
                 // Use find method to re-Query database that now includes the new data from
                 // extern. API
-                return this.find(date);
+                return false;
         }
 
         /**

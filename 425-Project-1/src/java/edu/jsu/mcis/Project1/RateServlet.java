@@ -6,6 +6,9 @@ import edu.jsu.mcis.dao.RateDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -39,10 +42,35 @@ public class RateServlet extends HttpServlet {
 
         response.setContentType("application/json; charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            String date = request.getParameter("date");
-            RateDAO dao = daoFactory.gRateDAO();
+            // contains date
+            if (request.getParameterMap().containsKey("date")
+                    && (!(request.getParameterMap().containsKey("currency")))) {
+                String date = request.getParameter("date");
+                RateDAO dao = daoFactory.gRateDAO();
+                out.println(dao.find(date));
 
-            out.println(dao.find(date));
+            }
+
+            // contains date and currency
+            else if (request.getParameterMap().containsKey("currency")) {
+
+                String date = request.getParameter("date");
+                String curency = request.getParameter("currency");
+
+                RateDAO dao = daoFactory.gRateDAO();
+                out.println(dao.findByDateCurrency(date, curency));
+            }
+            // does not contain date or currency
+            else {
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDateTime now = LocalDateTime.now();
+                LocalDate currentDate = now.toLocalDate();
+
+                System.out.println("Todays date --------------> " + currentDate.toString());
+
+                RateDAO dao = daoFactory.gRateDAO();
+                out.println(dao.find(currentDate.toString()));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
