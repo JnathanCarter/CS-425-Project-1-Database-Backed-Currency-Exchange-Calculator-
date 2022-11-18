@@ -33,7 +33,7 @@ public class UserDAO {
 
                         ps = conn.prepareStatement(QUERY_SELECT);
                         ps.setString(1, key);
-
+ 
                         boolean hasresults = ps.execute();
 
                         if (hasresults) {

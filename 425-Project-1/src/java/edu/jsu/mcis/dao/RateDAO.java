@@ -46,7 +46,7 @@ public class RateDAO {
          * If the information does not exist,
          * then it is fetched by an external source using updateInternalDB()
          * 
-     * @param key
+         * @param key
          * @param date - String for date of the rates
          * @return - JSON String containing rate information
          */
@@ -125,7 +125,7 @@ public class RateDAO {
                         }
                         return JSONValue.toJSONString(json);
                 } else {
-                        return "{\"message\"Key is NOT valid\",\"success\": false}";
+                        return "{\"message\":\"This API requires a valid access key\",\"success\": false}";
                 }
         }
 
@@ -387,17 +387,17 @@ public class RateDAO {
         }
 
         private boolean accessLimitReached(String key) {
-            /*    
-            UserAccessDAO userAccessDAO = daoFactory.getUserAccesDAO();
-                UserDAO userDAO = daoFactory.getUserDAO();
-
-                if (userAccessDAO.checkIfAccessLimitReached(userDAO.getIDFromKey(key))) {
-                        userAccessDAO.incrementAccessCounter(userDAO.getIDFromKey(key));
-                        return true;
-                } else {
-                        return false;
-                }
-            */
-            return false;
+                /*
+                 * UserAccessDAO userAccessDAO = daoFactory.getUserAccesDAO();
+                 * UserDAO userDAO = daoFactory.getUserDAO();
+                 * 
+                 * if (userAccessDAO.checkIfAccessLimitReached(userDAO.getIDFromKey(key))) {
+                 * userAccessDAO.incrementAccessCounter(userDAO.getIDFromKey(key));
+                 * return true;
+                 * } else {
+                 * return false;
+                 * }
+                 */
+                return false;
         }
 }
