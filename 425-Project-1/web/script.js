@@ -53,14 +53,16 @@ var Lab4 = (function () {
         $("#output").html("The equivalent of " + formatterUSD.format(input_usd) + " in " + targetCurrency + " for the date " + rate_date + " is: " + result);
     };
 
-    var getRatesAndConvert = function (rate_date) {
+    var getRatesAndConvert = function (key, rate_date) {
 
         console.log("Getting rates for " + rate_date + " ...");
         // INSERT YOUR CODE HERE
 
-        var url = 'http://localhost:8180/425-Project-1/RateServlet?date=';
+        var url = 'http://localhost:8180/425-Project-1/RateServlet/';
 
         url += rate_date;
+        url += "?key=";
+        url += key;
 
         console.log("custom url----  " + url);
 
@@ -109,6 +111,7 @@ var Lab4 = (function () {
         onClick: function () {
 
             var rate_date = $("#rate_date").val();
+            var key = $('#apikey').val();
 
             if (rate_date === "") {
                 alert("Please enter or select a date in the \"Date\" field!");
@@ -118,7 +121,7 @@ var Lab4 = (function () {
                 // if rates have not been retrieved yet, or if the date is different, fetch new rates
 
                 if ((rates === null) || (rate_date !== rates["date"])) {
-                    getRatesAndConvert(rate_date);
+                    getRatesAndConvert(key, rate_date);
                 }
 
                 // if rates for the selected date are already available, perform the conversion
