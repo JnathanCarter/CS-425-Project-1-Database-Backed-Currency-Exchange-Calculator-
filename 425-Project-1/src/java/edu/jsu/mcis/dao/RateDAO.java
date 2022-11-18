@@ -208,7 +208,9 @@ public class RateDAO {
 
                 try {
                         // HTTP GET request to external api for rate data
-                        URL url = new URL("https://testbed.jaysnellen.com:8443/JSUExchangeRatesServer/rates");
+                        String urlString = "https://testbed.jaysnellen.com:8443/JSUExchangeRatesServer/rates?date="+date;
+                        URL url = new URL(urlString);
+                        
                         HttpURLConnection con = (HttpURLConnection) url.openConnection();
                         con.setRequestMethod("GET");
 
@@ -312,8 +314,8 @@ public class RateDAO {
                         Iterator<Map.Entry<String, Object>> itr = map.entrySet().iterator();
                         while (itr.hasNext()) {
                                 Map.Entry<String, Object> entry = itr.next();
-                                System.out.println("Key = " + entry.getKey() +
-                                                ", Value = " + entry.getValue());
+                                System.out.println("retrived Key = " + entry.getKey() +
+                                                ", retrieved Value = " + entry.getValue());
 
                                 ps.setString(1, entry.getKey());
                                 ps.setString(2, date);

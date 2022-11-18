@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.parser.DTD;
 
 public class RateServlet extends HttpServlet {
     /**
@@ -42,33 +43,49 @@ public class RateServlet extends HttpServlet {
 
         response.setContentType("application/json; charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            // contains date
-            if (request.getParameterMap().containsKey("date")
-                    && (!(request.getParameterMap().containsKey("currency")))) {
-                String date = request.getParameter("date");
-                RateDAO dao = daoFactory.gRateDAO();
-                out.println(dao.find(date));
+            String uri = request.getPathInfo();
+            String[] path;
+            if (uri != null) {
+                path = uri.split("/");
 
-            }
-
-            // contains date and currency
-            else if (request.getParameterMap().containsKey("currency")) {
-
-                String date = request.getParameter("date");
-                String curency = request.getParameter("currency");
+                String date;
+                String currency;
 
                 RateDAO dao = daoFactory.gRateDAO();
-                out.println(dao.findByDateCurrency(date, curency));
-            }
-            // does not contain date or currency
-            else {
+
+                int lengthOfPath = path.length;
+
+                switch (lengthOfPath) {
+                    /*
+                     * case 1:
+                     * DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                     * LocalDateTime now = LocalDateTime.now();
+                     * LocalDate currentDate = now.toLocalDate();
+                     * 
+                     * System.out.println("Todays date --------------> " + currentDate.toString());
+                     * 
+                     * out.println(dao.find(currentDate.toString()));
+                     * break;
+                     */
+                    case 2:
+                        date = path[1];
+                        out.println(dao.find(date));
+                        break;
+                    case 3:
+                        date = path[1];
+                        currency = path[2];
+
+                        out.println(dao.findByDateCurrency(date, currency));
+                        break;
+                }
+            } else {
+                RateDAO dao = daoFactory.gRateDAO();
                 DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 LocalDateTime now = LocalDateTime.now();
                 LocalDate currentDate = now.toLocalDate();
 
                 System.out.println("Todays date --------------> " + currentDate.toString());
 
-                RateDAO dao = daoFactory.gRateDAO();
                 out.println(dao.find(currentDate.toString()));
             }
 

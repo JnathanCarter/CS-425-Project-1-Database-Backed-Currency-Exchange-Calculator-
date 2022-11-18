@@ -14,7 +14,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RateServlet</servlet-name>
-        <url-pattern>/RateServlet</url-pattern>
+        <url-pattern>/RateServlet/*</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
